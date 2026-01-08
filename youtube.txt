@@ -1,0 +1,36 @@
+import sys
+import subprocess
+
+# Check if yt-dlp is installed, if not install it
+try:
+    import yt_dlp
+except ImportError:
+    print("yt-dlp module not found. Installing...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
+    import yt_dlp
+
+def download_video(url, quality="720p"):
+    """
+    Downloads a YouTube video in the specified quality directly to the Downloads folder.
+    """
+    # Get the Downloads folder path
+    from pathlib import Path
+    downloads_path = str(Path.home() / "Downloads")  # cross-platform
+
+    ydl_opts = {
+        "format": f"best[height<={quality[:-1]}]",  # progressive stream only
+        "outtmpl": f"{downloads_path}/%(title)s.%(ext)s",  # save to Downloads
+        "noplaylist": True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        print(f"\n✅ Download completed! Saved to {downloads_path}")
+    except Exception as e:
+        print("❌ Error downloading video:", e)
+
+if __name__ == "__main__":
+    video_url = input("Enter YouTube video link: ").strip()
+    chosen_quality = input("Enter desired quality (360p, 480p, 720p): ").strip()
+    download_video(video_url, chosen_quality)
